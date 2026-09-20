@@ -77,3 +77,16 @@ clientes:
     nombre: "COPPEL"
     clabe_ordenante: []
     patrones: []
+
+  - rfc: TRU7911227L6
+    nombre: "PARCELMOBI"
+    clabe_ordenante: []
+    patrones: []
+    notas: |
+      Nunca se ha visto un depósito suyo. Es el cliente con la cartera más vencida:
+      22 facturas de enero y julio de 2026 sin cobrar, la más antigua con 238 días.
+
+  - rfc: GPA120516LY0
+    nombre: "GODO PARSA"
+    clabe_ordenante: []
+    patrones: []
