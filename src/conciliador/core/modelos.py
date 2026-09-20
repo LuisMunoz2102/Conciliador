@@ -121,6 +121,7 @@ class EstadoCuenta(BaseModel):
 class Comprobante(BaseModel):
     uuid: str
     rol: RolFiscal
+    tipo: str = "Factura"
     serie: str | None = None
     folio: str | None = None
     fecha_emision: date
@@ -140,6 +141,12 @@ class Comprobante(BaseModel):
 
     monto_cobrable_cent: int = 0
     saldo_pendiente_cent: int = 0
+    marcada_cobrada: bool = False
+    fila_origen: int = 0
+
+    @property
+    def es_nota_credito(self) -> bool:
+        return "NOTA" in self.tipo.upper() or self.total_cent < 0
 
     @property
     def contraparte_rfc(self) -> str:

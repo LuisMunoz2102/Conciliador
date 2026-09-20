@@ -1,0 +1,79 @@
+# Traduce el concepto del depósito bancario a la contraparte que pagó.
+#
+# El orden de resolución es: CLABE ordenante primero, patrón de texto después.
+# La CLABE es determinista y no depende de cómo se haya escrito el concepto.
+#
+# No hay coincidencia difusa de razones sociales: con nombres mexicanos produce
+# falsos positivos. Si un depósito no cae en ninguna regla, se reporta como
+# "sin identificar" y se agrega aquí a mano. El comando `sugerir-reglas` lista
+# los conceptos sin mapear y propone el bloque listo para pegar.
+
+version: 1
+
+defaults:
+  ventana_dias_antes: 120
+  ventana_dias_despues: 3
+  tolerancia_centavos: 0
+
+# Abonos que no son cobros a clientes. No se descartan: se clasifican, para que
+# la suma de todas las categorías siga cuadrando contra el total del banco.
+ruido:
+  - id: intereses
+    patron: "ABO POR INTERESES"
+    etiqueta: "Ingreso financiero por intereses bancarios"
+  - id: compensacion
+    patron: "COMPENSACION SPEI"
+    etiqueta: "Compensación del banco"
+  - id: devolucion
+    patron: "DEVOLUCION"
+    etiqueta: "Devolución de un SPEI enviado que fue rechazado. No es un cobro."
+
+# Empresas de factoraje: adelantan el importe de un paquete de facturas, neto de
+# comisión, de modo que el depósito nunca coincide con el total de una factura.
+factores:
+  - id: twcf
+    nombre: "TWCF (factoraje)"
+    patrones:
+      - "ADVANCE - FUNDING SOURCE - TWCF"
+    captura_lote: 'TWCF\s+(\d{6,8})'
+    # Comisión observada en septiembre 2026: 1.142% y 1.164%.
+    comision_min: 0.005
+    comision_max: 0.025
+    # RFC de los clientes cuyas facturas financia este factor.
+    financia_a:
+      - DCM991109KR2
+
+clientes:
+  - rfc: ANE140618P37
+    nombre: "SERVICIOS COMERCIALES AMAZON MEXICO"
+    # Los tres depósitos "FCS" de junio y los tres de septiembre coincidieron
+    # exactos con facturas de Amazon. Todos vienen de esta misma CLABE.
+    clabe_ordenante:
+      - "021180040573182974"
+    patrones:
+      - '^FCS\d+'
+    notas: "Paga por TEF, una factura por depósito, importe exacto."
+
+  - rfc: DCM991109KR2
+    nombre: "DEREMATE.COM DE MEXICO"
+    clabe_ordenante:
+      - "124180016579505871"
+    patrones:
+      - "DEREMATE.COM DE MEXICO"
+    notas: "Paga directo por SPEI, y además cede facturas al factor TWCF."
+
+  - rfc: EME880309SK5
+    nombre: "ESTAFETA MEXICANA"
+    clabe_ordenante: []
+    patrones: []
+    notas: "Sin depósitos identificados todavía. Falta mapear su concepto."
+
+  - rfc: CYT160630UU0
+    nombre: "CYTIELOGISTICS"
+    clabe_ordenante: []
+    patrones: []
+
+  - rfc: COP920428Q20
+    nombre: "COPPEL"
+    clabe_ordenante: []
+    patrones: []
