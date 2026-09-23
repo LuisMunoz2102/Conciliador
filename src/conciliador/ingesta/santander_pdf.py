@@ -22,6 +22,7 @@ from pathlib import Path
 
 import pdfplumber
 
+from ..core.archivos import ruta_legible
 from ..core.dinero import a_centavos
 from ..core.modelos import EstadoCuenta, MovimientoBancario
 from ..core.texto import extraer_clabe, normalizar
@@ -192,7 +193,7 @@ def leer_estado_cuenta(ruta: str | Path) -> EstadoCuenta:
     ruta = Path(ruta)
     movimientos: list[MovimientoBancario] = []
 
-    with pdfplumber.open(ruta) as pdf:
+    with ruta_legible(ruta) as legible, pdfplumber.open(legible) as pdf:
         cabecera = _texto_encabezado(pdf)
 
         for num, pagina in enumerate(pdf.pages, start=1):

@@ -12,6 +12,7 @@ from pathlib import Path
 
 import openpyxl
 
+from ..core.archivos import ruta_legible
 from ..core.dinero import a_centavos
 from ..core.modelos import Comprobante, MetodoPago, RolFiscal
 from ..core.texto import normalizar
@@ -91,7 +92,12 @@ def _metodo(crudo: str) -> MetodoPago:
 
 def leer_facturas(ruta: str | Path, hoja: str | None = None) -> list[Comprobante]:
     """Devuelve las facturas vigentes. Las canceladas se descartan."""
-    libro = openpyxl.load_workbook(Path(ruta), data_only=True, read_only=True)
+    with ruta_legible(ruta) as legible:
+        return _leer_libro(legible, hoja)
+
+
+def _leer_libro(ruta: Path, hoja: str | None) -> list[Comprobante]:
+    libro = openpyxl.load_workbook(ruta, data_only=True, read_only=True)
     ws = libro[hoja] if hoja else libro[libro.sheetnames[0]]
 
     filas = ws.iter_rows(values_only=True)
